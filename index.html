@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Helpdesk</title>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Auth Screens */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-card h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-facebook {
+            background: #1877f2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-facebook:hover {
+            background: #166fe5;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-switch a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .dashboard-header {
+            background: #667eea;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .dashboard-content {
+            padding: 30px;
+        }
+
+        .connection-status {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .connection-status.connected {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .connection-status h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .connection-status p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .fb-page-info {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .fb-page-info h3 {
+            color: #1877f2;
+            margin-bottom: 10px;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .page-actions .btn {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .page-selector {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .page-selector h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .page-option {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-option:hover {
+            border-color: #1877f2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .page-option.selected {
+            border-color: #1877f2;
+            background: #f0f8ff;
+        }
+
+        .page-option h4 {
+            color: #1877f2;
+            margin-bottom: 5px;
+        }
+
+        .page-option p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Agent Interface */
+        .agent-interface {
+            display: flex;
+            height: calc(100vh - 100px);
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .conversations-sidebar {
+            width: 300px;
+            border-right: 1px solid #e1e5e9;
+            background: #f8f9fa;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+            background: white;
+        }
+
+        .sidebar-header h3 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .conversations-list {
+            height: calc(100% - 80px);
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e5e9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .conversation-item:hover {
+            background: #e9ecef;
+        }
+
+        .conversation-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .conversation-item h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .conversation-item p {
+            font-size: 12px;
+            opacity: 0.7;
+            line-height: 1.4;
+        }
+
+        .conversation-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+            background: white;
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+        }
+
+        .message.customer {
+            text-align: left;
+        }
+
+        .message.agent {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.customer .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.agent .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+
+        .reply-area {
+            padding: 20px;
+            border-top: 1px solid #e1e5e9;
+            background: white;
+        }
+
+        .reply-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .reply-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e1e5e9;
+            border-radius: 20px;
+            font-size: 14px;
+            resize: none;
+        }
+
+        .reply-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .send-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .customer-profile {
+            width: 280px;
+            border-left: 1px solid #e1e5e9;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 auto 10px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .profile-details {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .profile-details h4 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .profile-details p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.info {
+            background: #17a2b8;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .agent-interface {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .conversations-sidebar {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .customer-profile {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e1e5e9;
+            }
+        }
+
+        .webhook-setup {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .webhook-setup h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .webhook-setup p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .webhook-url {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="auth-container">
+        <div class="auth-card">
+            <h1>Sign In</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            <div class="auth-switch">
+                Don't have an account? <a href="#" id="showRegister">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Screen -->
+    <div id="registerScreen" class="auth-container hidden">
+        <div class="auth-card">
+            <h1>Create Account</h1>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email Address</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirm Password</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+            <div class="auth-switch">
+                Already have an account? <a href="#" id="showLogin">Sign In</a>
+            </div>
+        </div>
+    </div>
+    <div
+        class="fb-like"
+        data-share="true"
+        data-width="450"
+        data-show-faces="true">
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="hidden">
+        <div class="container">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <h1>Facebook Helpdesk</h1>
+                    <div class="user-info">
+                        <span id="userEmail"></span>
+                        <button class="logout-btn" id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+                <div class="dashboard-content">
+                    <!-- Webhook Setup Info -->
+                    <div class="webhook-setup">
+                        <h4>⚠️ Setup Required</h4>
+                        <p>To receive real Facebook messages, you need to set up webhooks. Your webhook URL should be:</p>
+                        <div class="webhook-url" id="webhookUrl">https://your-server.com/webhook</div>
+                        <p>Please configure this URL in your Facebook App's Messenger settings with the verify token: <strong>my_verify_token</strong></p>
+                    </div>
+
+                    <div id="connectionStatus" class="connection-status">
+                        <h2>Connect Your Facebook Page</h2>
+                        <p>Connect your Facebook page to start receiving and managing messages from your customers.</p>
+                        <button class="btn btn-facebook" id="connectFbBtn">
+                            <span>📘</span>
+                            Connect Facebook Page
+                        </button>
+                    </div>
+                    
+                    <!-- Page Selection -->
+                    <div id="pageSelector" class="page-selector hidden">
+                        <h3>Select Your Facebook Page</h3>
+                        <div id="pagesList"></div>
+                        <button class="btn btn-primary" id="confirmPageBtn" disabled>Connect Selected Page</button>
+                    </div>
+                    
+                    <div id="connectedPage" class="hidden">
+                        <div class="fb-page-info">
+                            <h3 id="pageName">Connected Facebook Page</h3>
+                            <p id="pageDescription">Your Facebook page is successfully connected and listening for messages.</p>
+                            <div class="page-actions">
+                                <button class="btn btn-success" id="replyToMessagesBtn">Reply To Messages</button>
+                                <button class="btn btn-danger" id="deleteFbConnectionBtn">Delete Integration</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Interface Screen -->
+    <div id="agentScreen" class="hidden">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Message Center</h1>
+                <div class="user-info">
+                    <button class="logout-btn" id="backToDashboardBtn">Back to Dashboard</button>
+                    <button class="logout-btn" id="logoutBtn2">Logout</button>
+                </div>
+            </div>
+            <div class="agent-interface">
+                <div class="conversations-sidebar">
+                    <div class="sidebar-header">
+                        <h3>Conversations</h3>
+                    </div>
+                    <div class="conversations-list" id="conversationsList">
+                        <div class="empty-state">
+                            <h3>No Conversations</h3>
+                            <p>Messages will appear here when customers contact you on Facebook.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-area">
+                    <div class="chat-header">
+                        <h3 id="chatTitle">Select a conversation</h3>
+                    </div>
+                    <div class="messages-container" id="messagesContainer">
+                        <div class="empty-state">
+                            <h3>Welcome to Message Center</h3>
+                            <p>Select a conversation from the sidebar to start replying to customer messages.</p>
+                        </div>
+                    </div>
+                    <div class="reply-area hidden" id="replyArea">
+                        <form class="reply-form" id="replyForm">
+                            <textarea class="reply-input" id="replyInput" placeholder="Type your reply..." rows="1"></textarea>
+                            <button type="submit" class="send-btn" id="sendBtn">Send</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="customer-profile">
+                    <div id="customerProfileContent">
+                        <div class="empty-state">
+                            <h3>Customer Profile</h3>
+                            <p>Customer details will appear here when you select a conversation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - REPLACE THESE WITH YOUR ACTUAL VALUES
+        const CONFIG = {
+            FACEBOOK_APP_ID: '746900911117879', // Replace with your Facebook App ID
+            SERVER_URL: 'https://ee8e-2405-201-a413-8a52-8c11-dfad-554d-49bf.ngrok-free.app/webhook', // Replace with your server URL
+            VERIFY_TOKEN: 'my_verify_token' // This should match your webhook verify token
+        };
+
+        // Application State
+        let currentUser = null;
+        let fbPageConnection = null;
+        let conversations = [];
+        let selectedConversation = null;
+        let fbPages = [];
+        let selectedPageId = null;
+        let fbAccessToken = null;
+        
+        // Initialize Facebook SDK
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: CONFIG.FACEBOOK_APP_ID,
+                cookie: true,
+                xfbml: true,
+                version: 'v18.0'
+            });
+
+            // Check if user is already logged into Facebook
+            FB.getLoginStatus(function(response) {
+                console.log('Facebook login status:', response);
+            });
+        };
+
+        // Local Storage Management
+        let users = JSON.parse(localStorage.getItem('fb_helpdesk_users') || '[]');
+        let connections = JSON.parse(localStorage.getItem('fb_helpdesk_connections') || '[]');
+        let messagesData = JSON.parse(localStorage.getItem('fb_helpdesk_messages') || '[]');
+
+        // Update webhook URL display
+        document.getElementById('webhookUrl').textContent = `${CONFIG.SERVER_URL}/webhook`;
+
+        // Screen Management
+        function showScreen(screenId) {
+            const screens = ['loginScreen', 'registerScreen', 'dashboardScreen', 'agentScreen'];
+            screens.forEach(screen => {
+                document.getElementById(screen).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 4000);
+        }
+
+        // Authentication
+        document.getElementById('showRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            showScreen('registerScreen');
+        });
+
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            showScreen('loginScreen');
+        });
+
+        // Register
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (users.find(user => user.email === email)) {
+                showNotification('Email already exists', 'error');
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('fb_helpdesk_users', JSON.stringify(users));
+            
+            showNotification('Account created successfully!');
+            showScreen('loginScreen');
+        });
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('userEmail').textContent = user.email;
+                loadUserConnection();
+                showScreen('dashboardScreen');
+                showNotification(`Welcome back, ${user.name}!`);
+            } else {
+                showNotification('Invalid email or password', 'error');
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('logoutBtn2').addEventListener('click', logout);
+
+        function logout() {
+            currentUser = null;
+            fbPageConnection = null;
+            selectedConversation = null;
+            fbPages = [];
+            selectedPageId = null;
+            fbAccessToken = null;
+            showScreen('loginScreen');
+            showNotification('Logged out successfully');
+        }
+
+        // Facebook Connection
+        function loadUserConnection() {
+            fbPageConnection = connections.find(conn => conn.userId === currentUser.id);
+            
+            if (fbPageConnection) {
+                document.getElementById('connectionStatus').classList.add('hidden');
+                document.getElementById('pageSelector').classList.add('hidden');
+                document.getElementById('connectedPage').classList.remove('hidden');
+                document.getElementById('pageName').textContent = fbPageConnection.pageName;
+                loadConversations();
+            } else {
+                document.getElementById('connectionStatus').classList.remove('hidden');
+                document.getElementById('pageSelector').classList.add('hidden');
+                document.getElementById('connectedPage').classList.add('hidden');
+            }
+        }
+
+        // Real Facebook Login
+        document.getElementById('connectFbBtn').addEventListener('click', () => {
+            const btn = document.getElementById('connectFbBtn');
+            btn.innerHTML = '<span class="loading"></span> Connecting...';
+            btn.disabled = true;
+
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    fbAccessToken = response.authResponse.accessToken;
+                    showNotification('Facebook login successful! Fetching your pages...', 'info');
+                    
+                    // Get user's pages
+                    FB.api('/me/accounts', function(pagesResponse) {
+                        if (pagesResponse.data && pagesResponse.data.length > 0) {
+                            fbPages = pagesResponse.data;
+                            displayPageSelector();
+                        } else {
+                            showNotification('No pages found. Please create a Facebook page first.', 'error');
+                            resetConnectButton();
+                        }
+                    });
+                } else {
+                    showNotification('Facebook login cancelled or failed', 'error');
+                    resetConnectButton();
+                }
+            }, {
+                scope: 'pages_show_list,pages_messaging,pages_manage_metadata,pages_read_engagement'
+            });
+        });
+
+        function resetConnectButton() {
+            const btn = document.getElementById('connectFbBtn');
+            btn.innerHTML = '<span>📘</span> Connect Facebook Page';
+            btn.disabled = false;
+        }
+
+        function displayPageSelector() {
+            document.getElementById('connectionStatus').classList.add('hidden');
+            document.getElementById('pageSelector').classList.remove('hidden');
+            
+            const pagesList = document.getElementById('pagesList');
+            pagesList.innerHTML = fbPages.map(page => `
+                <div class="page-option" data-page-id="${page.id}">
+                    <h4>${page.name}</h4>
+                    <p>Category: ${page.category || 'Not specified'}</p>
+                </div>
+            `).join('');
+
+            // Add click handlers for page selection
+            document.querySelectorAll('.page-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.page-option').forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedPageId = option.dataset.pageId;
+                    document.getElementById('confirmPageBtn').disabled = false;
+                });
+            });
+
+            resetConnectButton();
+        }
+
+        // Confirm page selection
+        document.getElementById('confirmPageBtn').addEventListener('click', () => {
+            if (!selectedPageId) {
+                showNotification('Please select a page first', 'error');
+                return;
+            }
+
+            const selectedPage = fbPages.find(p => p.id === selectedPageId);
+            const pageAccessToken = selectedPage.access_token;
+            
+            // Here you would typically subscribe the page to your app's webhooks
+            // This requires a POST request to /{page-id}/subscribed_apps with the page access token
+            FB.api(`/${selectedPageId}/subscribed_apps`, 'post', { access_token: pageAccessToken }, function(response) {
+                console.log('Subscribed to webhooks:', response);
+                if (response.success) {
+                     const newConnection = {
+                        userId: currentUser.id,
+                        pageId: selectedPage.id,
+                        pageName: selectedPage.name,
+                        pageAccessToken: pageAccessToken, // Note: For security, never store this client-side in a real app
+                        connectedAt: new Date().toISOString()
+                    };
+
+                    connections.push(newConnection);
+                    localStorage.setItem('fb_helpdesk_connections', JSON.stringify(connections));
+                    
+                    showNotification(`Connected to ${selectedPage.name} successfully!`, 'success');
+                    loadUserConnection();
+                } else {
+                    showNotification('Failed to subscribe to page webhooks. Check console for details.', 'error');
+                    console.error('Webhook subscription failed:', response);
+                }
+            });
+        });
+
+        // Delete FB Connection
+        document.getElementById('deleteFbConnectionBtn').addEventListener('click', () => {
+            const connectionIndex = connections.findIndex(conn => conn.userId === currentUser.id);
+            if (connectionIndex > -1) {
+                connections.splice(connectionIndex, 1);
+                localStorage.setItem('fb_helpdesk_connections', JSON.stringify(connections));
+                loadUserConnection();
+                showNotification('Facebook integration deleted.', 'info');
+            }
+        });
+
+        // Agent Interface Logic
+        document.getElementById('replyToMessagesBtn').addEventListener('click', () => {
+            showScreen('agentScreen');
+        });
+
+        document.getElementById('backToDashboardBtn').addEventListener('click', () => {
+            showScreen('dashboardScreen');
+        });
+        
+        function loadConversations() {
+            if (!fbPageConnection) return;
+            // In a real app, you'd fetch these from your backend.
+            // For this example, we'll use localStorage and simulate messages.
+            const allMessages = messagesData.filter(m => m.pageId === fbPageConnection.pageId);
+            
+            const convs = allMessages.reduce((acc, msg) => {
+                const psid = msg.sender.id === fbPageConnection.pageId ? msg.recipient.id : msg.sender.id;
+                if (!acc[psid]) {
+                    acc[psid] = {
+                        id: psid,
+                        customerName: `User ${psid.substr(-4)}`, // Placeholder name
+                        lastMessage: msg.message.text,
+                        timestamp: msg.timestamp,
+                        messages: []
+                    };
+                }
+                acc[psid].messages.push(msg);
+                if (msg.timestamp > acc[psid].timestamp) {
+                    acc[psid].lastMessage = msg.message.text;
+                    acc[psid].timestamp = msg.timestamp;
+                }
+                return acc;
+            }, {});
+            
+            conversations = Object.values(convs).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            renderConversations();
+        }
+
+        function renderConversations() {
+            const list = document.getElementById('conversationsList');
+            if (conversations.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Conversations</h3>
+                        <p>Messages will appear here.</p>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = conversations.map(conv => `
+                <div class="conversation-item ${selectedConversation && selectedConversation.id === conv.id ? 'active' : ''}" data-conv-id="${conv.id}">
+                    <h4>${conv.customerName}</h4>
+                    <p>${conv.lastMessage}</p>
+                    <div class="conversation-time">${new Date(conv.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    selectedConversation = conversations.find(c => c.id === item.dataset.convId);
+                    renderConversations();
+                    renderMessages();
+                    renderCustomerProfile();
+                });
+            });
+        }
+        
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
+            if (!selectedConversation) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Welcome to Message Center</h3>
+                        <p>Select a conversation to start replying.</p>
+                    </div>`;
+                document.getElementById('replyArea').classList.add('hidden');
+                document.getElementById('chatTitle').textContent = 'Select a conversation';
+                return;
+            }
+            
+            document.getElementById('chatTitle').textContent = `Chat with ${selectedConversation.customerName}`;
+            
+            const messages = selectedConversation.messages.sort((a,b) => a.timestamp - b.timestamp);
+            container.innerHTML = messages.map(msg => {
+                const isAgent = msg.sender.id === fbPageConnection.pageId;
+                return `
+                    <div class="message ${isAgent ? 'agent' : 'customer'}">
+                        <div class="message-bubble">${msg.message.text}</div>
+                        <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.scrollTop = container.scrollHeight;
+            document.getElementById('replyArea').classList.remove('hidden');
+        }
+
+        function renderCustomerProfile() {
+            const container = document.getElementById('customerProfileContent');
+            if (!selectedConversation) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Customer Profile</h3>
+                        <p>Details will appear here.</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = `
+                <div class="profile-header">
+                    <div class="profile-avatar">${selectedConversation.customerName.charAt(0)}</div>
+                    <div class="profile-name">${selectedConversation.customerName}</div>
+                </div>
+                <div class="profile-details">
+                    <h4>Customer Details</h4>
+                    <p><strong>Facebook ID:</strong> ${selectedConversation.id}</p>
+                    <p><strong>First Contact:</strong> ${new Date(selectedConversation.messages[0].timestamp).toLocaleDateString()}</p>
+                </div>
+            `;
+        }
+        
+        // Reply form submission
+        document.getElementById('replyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const replyInput = document.getElementById('replyInput');
+            const text = replyInput.value.trim();
+
+            if (!text || !selectedConversation) return;
+            
+            const messageData = {
+                recipient: { id: selectedConversation.id },
+                messaging_type: "RESPONSE",
+                message: { text: text }
+            };
+
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span>';
+            
+            // Use the Page Access Token to send the message via the Graph API
+            FB.api('/me/messages', 'post', {
+                ...messageData,
+                access_token: fbPageConnection.pageAccessToken
+            }, function(response) {
+                btn.disabled = false;
+                btn.innerHTML = 'Send';
+                
+                if (response && !response.error) {
+                    console.log('Successfully sent message:', response);
+                    showNotification('Message sent!', 'success');
+                    replyInput.value = '';
+
+                    // Add sent message to local storage for simulation
+                    const sentMessage = {
+                        sender: { id: fbPageConnection.pageId },
+                        recipient: { id: selectedConversation.id },
+                        timestamp: Date.now(),
+                        message: {
+                            mid: response.message_id,
+                            text: text
+                        },
+                        pageId: fbPageConnection.pageId
+                    };
+                    messagesData.push(sentMessage);
+                    localStorage.setItem('fb_helpdesk_messages', JSON.stringify(messagesData));
+                    loadConversations();
+                    // Re-render messages for the currently selected conversation
+                    selectedConversation.messages.push(sentMessage);
+                    renderMessages();
+
+                } else {
+                    showNotification('Failed to send message. See console for details.', 'error');
+                    console.error('Error sending message:', response.error);
+                }
+            });
+        });
+        
+        // Example of handling a webhook event (for testing without a backend)
+        // In a real app, your server would receive this and push it to the client.
+        function simulateIncomingMessage(pageId, senderId, text) {
+            const incomingMessage = {
+                sender: { id: senderId },
+                recipient: { id: pageId },
+                timestamp: Date.now(),
+                message: {
+                    mid: "m_" + Math.random().toString(36).substr(2, 9),
+                    text: text
+                },
+                pageId: pageId
+            };
+            messagesData.push(incomingMessage);
+            localStorage.setItem('fb_helpdesk_messages', JSON.stringify(messagesData));
+
+            showNotification(`New message from User ${senderId.substr(-4)}`, 'info');
+
+            // If on agent screen, update conversations
+            if (document.getElementById('agentScreen').classList.contains('hidden') === false) {
+                 loadConversations();
+                 // if the conversation is open, refresh it
+                 if (selectedConversation && selectedConversation.id === senderId) {
+                    selectedConversation.messages.push(incomingMessage);
+                    renderMessages();
+                 }
+            }
+        }
+        
+        // Check for session on load
+        // This is a simplified session management. A real app would use tokens.
+        (function checkSession() {
+            // for this example, we don't have a persistent session,
+            // so we always start at the login screen.
+            showScreen('loginScreen');
+        })();
+
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const connectButton = document.querySelector('.connect-button'); // Adjust selector as needed
+    
+        connectButton.addEventListener('click', function() {
+        // Show loading state
+            connectButton.textContent = 'Connecting...';
+            connectButton.disabled = true;
+        
+        // Simulate connection (replace with actual API call)
+            setTimeout(() => {
+                alert('Page connected successfully!');
+                connectButton.textContent = 'Connected';
+                connectButton.style.backgroundColor = '#28a745'; // Green color
+            }, 2000);
+        });
+    });
+    </script>
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId      : '715380784573335',
+                xfbml      : true,
+                version    : 'v23.0'
+            });
+             FB.AppEvents.logPageView();
+};
+
+        (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+</script>
+</body>
+</html> 
